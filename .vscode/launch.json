@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch LlmBenchmark",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build LlmBenchmark",
+            "program": "${workspaceFolder}/LlmBenchmark/bin/Debug/net9.0/LlmBenchmark.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/LlmBenchmark",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+}

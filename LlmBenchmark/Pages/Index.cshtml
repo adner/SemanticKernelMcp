@@ -1,0 +1,88 @@
+﻿@page
+<style>
+    body{
+        background-color: cadetblue;
+    }
+    #messagesList {
+        border: 1px solid #999;
+        border-radius: 8px;
+        padding: 10px;
+        margin: 10px;
+        height: 650px;
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+        background-color: black;
+        color: white;
+        overflow-y: auto;
+    }
+    .userMessage {
+        text-align: right;
+        margin: 10px;
+        padding: 5px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        display: inline-block;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    .botMessage {
+        text-align: left;
+        margin: 10px;
+        padding: 5px;
+        background-color: #6c757d;
+        color: white;
+        border-radius: 5px;
+        max-width: 80%;
+        word-wrap: break-word;
+        display: inline-block;
+    }
+
+    .botMessage p:last-child {
+        margin-bottom: 0;
+    }
+
+    @@keyframes flash {
+        0% {
+            background-color: yellow;
+            color: black;
+        }
+        100% {
+            background-color: transparent;
+            color: inherit;
+        }
+    }
+
+    .flash-animation {
+        animation: flash 0.5s;
+    }
+
+</style>
+<div class="container" style="max-width: 700px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5); padding: 15px; background-color:white;">
+<div style="border-radius: 16px; border: 3px solid #4f8cff; background: linear-gradient(90deg, #4f8cff 0%, #38e8ff 100%); padding: 18px; margin: 18px 0; text-align: center;">
+    <span id="modelNameSpan" style="font-size: 2.2rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 8px #4f8cff;">
+        
+    </span>
+</div>
+    <div class="row p-1">
+        <div class="col-12">
+            <div id="messagesList"></div>
+        </div>
+    </div>
+     <div class="row p-1">
+        <div class="col-12"><input type="text" class="w-100" id="messageInput" /></div>
+    </div>
+    <div class="row p-1 align-items-center">
+        <div class="col-6">
+            <span id="inputTokensSpan" style="font-size: 1rem; color: #4f8cff; font-weight: bold;">IN: 0</span>
+            <span id="outputTokensSpan" style="font-size: 1rem; color: #38e8ff; font-weight: bold;" class="ms-2">OUT: 0</span>
+            <span id="costSpan" style="font-size: 1rem; color: Green; font-weight: bold;" class="ms-2">0💲</span>
+        </div>
+        <div class="col-6 d-flex justify-content-end">
+            <input type="button" id="sendButton" value="Send Message" class="me-2" />
+        </div>
+    </div>
+</div>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+<script src="~/js/chat.js"></script>

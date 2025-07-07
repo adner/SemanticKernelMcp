@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build LlmBenchmark",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/LlmBenchmark/LlmBenchmark.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

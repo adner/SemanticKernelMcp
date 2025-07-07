@@ -1,0 +1,80 @@
+html {
+  font-size: 14px;
+  background-color: cadetblue;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+#messagesList
+{
+    font-size: 1rem;
+  }
+
+  .toolCall {
+    background-color: bisque;
+    border-radius: 8px;
+    padding: 2px 8px;
+    margin-bottom: 5px;
+    display: inline-flex;
+    align-items: center;
+    color: black;
+    margin-right: 5px;
+    font-weight: bold;
+  }
+
+  .toolCall::before {
+    content: "🛠️";
+    font-size: 1.1em;
+    margin-right: 2px;
+    animation: grow 0.5s linear 3;
+  }
+
+  @keyframes grow {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.8);
+    }
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spinner .6s linear infinite;
+    margin-top:2px;
+  }
+
+  @keyframes spinner {
+    to {transform: rotate(360deg);}
+  }
