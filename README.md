@@ -17,9 +17,11 @@ The Dataverse MCP Server parameters in the method `getDataverseMcpClient` in `Se
 
 Build everything: `dotnet build`
 
+Go to the web app folder: `cd LlmBenchmark`
+
 Run the web application: `dotnet run`
 
-The demo can now be accessed on [https://localhost:7163/frame](https://localhost:7163/frame) . 
+The demo can now be accessed on [https://localhost:port/frame](https://localhost:port/frame) . 
 
-Individual models can be accessed on for example [https://localhost:7163/?model=o4-mini](https://localhost:7163/?model=o4-mini) .
+Individual models can be accessed on for example [https://localhost:port/?model=o4-mini](https://localhost:port/?model=o4-mini) .
 
