@@ -1,6 +1,6 @@
 # SemanticKernelMcp
 
-This is a demo of using the [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) to utilize the Dataverse MCP Server which is posted to [LinkedIn](https://www.linkedin.com/posts/andreas-adner-70b1153_benchmark-of-llms-using-dataverse-mcp-server-activity-7348442438119665665-lLhZ?utm_source=share&utm_medium=member_desktop&rcm=ACoAAACM8rsBEgQIrYgb4NZAbnxwfDRk_Tu5e3w).
+This is a demo of using the [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) to utilize the Dataverse MCP Server, which I posted to [LinkedIn](https://www.linkedin.com/posts/andreas-adner-70b1153_benchmark-of-llms-using-dataverse-mcp-server-activity-7348442438119665665-lLhZ?utm_source=share&utm_medium=member_desktop&rcm=ACoAAACM8rsBEgQIrYgb4NZAbnxwfDRk_Tu5e3w).
 
 Since the [modelcontextprotocol/csharp-sdk](https://github.com/modelcontextprotocol/csharp-sdk) didn't work with the [Dataverse MCP Server](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-mcp) (see [this issue](https://github.com/modelcontextprotocol/csharp-sdk/issues/594)), I had to fork this repo and create a fix which can be found [here](https://github.com/adner/csharp-sdk) and that is also a submodule of this repo.
 
