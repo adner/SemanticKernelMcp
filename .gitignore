@@ -398,4 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 
-csharp-sdk/
+# csharp-sdk/
