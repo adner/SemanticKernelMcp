@@ -152,11 +152,11 @@ public class SimplifiedKernel
             Command = "Microsoft.PowerPlatform.Dataverse.MCP",
             Arguments = [
                 "--ConnectionUrl",
-                "https://make.powerautomate.com/environments/7c89bd81-ec79-e990-99eb-90d823595740/connections?apiName=shared_commondataserviceforapps\"&\"connectionName=91433eff0e204d9a96771a47117a7d48",
+                "https://make.powerautomate.com/environments/6d4b5002-f3d1-e8e3-8e8d-4a8983d6535c/connections?apiName=shared_commondataserviceforapps\"&\"connectionName=5006ad27f35e4dd59e1ecfdd2f99e09f",
                 "--MCPServerName",
                 "DataverseMCPServer",
                 "--TenantId",
-                "ea59b638-3d02-4773-83a8-a7f8606da0b6",
+                "d6d4b12d-51da-48bf-a808-a0e527802b89",
                 "--EnableHttpLogging",
                 "true",
                 "--EnableMsalLogging",
@@ -228,6 +228,8 @@ public class OrchestratorKernel
     {
         this.costPerInputToken = costPerInputToken;
         this.costPerOutputToken = costPerOutputToken;
+
+        this.chatHistory.AddSystemMessage("You are an expert large language model evaluation agent. Your job is to evaluate the performance of other large language models, by asking questions to the models and evaluate their answers. Specifically, you are evaluating how well the models can use the 'Dataverse MCP Server', which is a tool for communicating with Microsoft Dataverse. You have access to the send_message_to_model function - this can be used to send messages to the model that you are currently evaluating. You have access to the function set_current_model - this can be used to set the name of the model that you intend to evaluate, and must be called before evaluation of the model begins. The user will ask you to evaluate a number of models, and you should evaluate all models in sequence, and complete one evaluation before moving on to the next. If the model answer is not correct or if the model asks a question, then you must give the model additional information by calling send_message_to_model up to two times - make note of this, and include it in the final evaluation. When all models have been evaluated I want you to provide a clear ranking of the models, and explain to reasoning behind it. Ask the models to explain the steps they use to provide answers, but make sure that the model is not verbose. Tell the model directly to ask for help if it is not finding the answer, instead of guessing. The user will tell you to ask the model a number of questions. You should ask these questions in sequence and wait for a response before moving on to the next question. You should not move on to the next question before the model has provided a clear answer, or if it has exhausted the five additional clarifications that you may provide to the model, per question. ");
     }
 
     public async void SetCurrentModel(string modelName)
