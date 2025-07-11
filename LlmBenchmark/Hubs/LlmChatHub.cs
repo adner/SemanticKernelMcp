@@ -7,6 +7,8 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using SemanticKernelMcpLib;
 using Microsoft.SemanticKernel;
+using Microsoft.Extensions.Options;
+using LlmBenchmark.Models;
 
 namespace SignalRChat.Hubs
 {
@@ -14,14 +16,20 @@ namespace SignalRChat.Hubs
     public class LlmChatHub : Hub
     {
         private static readonly ConcurrentDictionary<string, Channel<string>> _streams = new ConcurrentDictionary<string, Channel<string>>();
+        private readonly LlmSettings _llmSettings;
+
+        public LlmChatHub(IOptions<LlmSettings> llmSettings)
+        {
+            _llmSettings = llmSettings.Value;
+        }
 
         public IAsyncEnumerable<string> LlmStream(string model,
         CancellationToken cancellationToken)
         {
             Context.Items["model"] = model;
 
-            Kernel kernel = null;
-            SimplifiedKernel myKernel = null;
+            Kernel? kernel = null;
+            SimplifiedKernel? myKernel = null;
             double costPerInputToken = 0, costPerOutputToken = 0;
 
             if (model == "gpt-4.1-mini")
@@ -62,6 +70,9 @@ namespace SignalRChat.Hubs
                 costPerOutputToken = 0.4 / 1000000;
             }
 
+            if (kernel == null)
+                throw new InvalidOperationException($"Unsupported model: {model}");
+
             kernel.FunctionInvocationFilters.Add(new MyFunctionInvocationHandler(Context));
 
             myKernel = new SimplifiedKernel(kernel, costPerInputToken, costPerOutputToken, model);
@@ -82,8 +93,11 @@ namespace SignalRChat.Hubs
 
         public async Task SendMessage(string message)
         {
-            string model = (string)Context.Items["model"];
-            SimplifiedKernel myKernel = (SimplifiedKernel)Context.Items["myKernel"];
+            string? model = Context.Items["model"] as string;
+            SimplifiedKernel? myKernel = Context.Items["myKernel"] as SimplifiedKernel;
+
+            if (model == null || myKernel == null)
+                return;
 
             if (_streams.TryGetValue(Context.ConnectionId, out var channel))
             {
@@ -112,28 +126,28 @@ namespace SignalRChat.Hubs
         Kernel create_Gpt41mini_Kernel()
         {
             var builder = Kernel.CreateBuilder();
-            builder.AddOpenAIChatCompletion(modelId: "gpt-4.1-mini", apiKey: "sk-proj-PC...A3d4-9HrUM8IA");
+            builder.AddOpenAIChatCompletion(modelId: "gpt-4.1-mini", apiKey: _llmSettings.OpenAI.ApiKey);
             return builder.Build();
         }
 
         Kernel create_Gpt41nano_Kernel()
         {
             var builder = Kernel.CreateBuilder();
-            builder.AddOpenAIChatCompletion(modelId: "gpt-4.1-nano", apiKey: "sk-proj-PC...A3d4-9HrUM8IA");
+            builder.AddOpenAIChatCompletion(modelId: "gpt-4.1-nano", apiKey: _llmSettings.OpenAI.ApiKey);
             return builder.Build();
         }
 
         Kernel create_Gpt41_Kernel()
         {
             var builder = Kernel.CreateBuilder();
-            builder.AddOpenAIChatCompletion(modelId: "gpt-4.1", apiKey: "sk-proj-PC...A3d4-9HrUM8IA");
+            builder.AddOpenAIChatCompletion(modelId: "gpt-4.1", apiKey: _llmSettings.OpenAI.ApiKey);
             return builder.Build();
         }
 
         Kernel create_o4mini_Kernel()
         {
             var builder = Kernel.CreateBuilder();
-            builder.AddOpenAIChatCompletion(modelId: "o4-mini", apiKey: "sk-proj-PC...A3d4-9HrUM8IA");
+            builder.AddOpenAIChatCompletion(modelId: "o4-mini", apiKey: _llmSettings.OpenAI.ApiKey);
             return builder.Build();
         }
 
@@ -141,8 +155,8 @@ namespace SignalRChat.Hubs
         {
 #pragma warning disable SKEXP0070
 
-            var endpoint = new Uri("https://ai-andreasadner0331ai924044154211.services.ai.azure.com/models");
-            var apiKey = "2A1wbo...G4yCQ";
+            var endpoint = new Uri(_llmSettings.AzureAI.Endpoint);
+            var apiKey = _llmSettings.AzureAI.ApiKey;
             var model = "DeepSeek-R1-0528";
 
             IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
@@ -157,8 +171,8 @@ namespace SignalRChat.Hubs
         {
 #pragma warning disable SKEXP0070
 
-            var endpoint = new Uri("https://ai-andreasadner0331ai924044154211.services.ai.azure.com/models");
-            var apiKey = "2A1wbo...G4yCQ";
+            var endpoint = new Uri(_llmSettings.AzureAI.Endpoint);
+            var apiKey = _llmSettings.AzureAI.ApiKey;
             var model = "grok-3-mini";
 
             IKernelBuilder kernelBuilder = Kernel.CreateBuilder();

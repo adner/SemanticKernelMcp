@@ -46,6 +46,12 @@ body {
     color: black;
     margin-right: 5px;
     font-weight: bold;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    min-width: 0;
+    flex-shrink: 1;
   }
 
   .toolCall::before {

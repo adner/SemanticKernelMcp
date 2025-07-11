@@ -10,7 +10,30 @@
             "args": [],
             "cwd": "${workspaceFolder}/LlmBenchmark",
             "stopAtEntry": false,
-            "console": "internalConsole"
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": ".NET Core Launch LlmBenchmark (with watch)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build LlmBenchmark",
+            "program": "dotnet",
+            "args": ["watch", "run", "--no-restore"],
+            "cwd": "${workspaceFolder}/LlmBenchmark",
+            "stopAtEntry": false,
+            "console": "integratedTerminal",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
         }
     ]
 }

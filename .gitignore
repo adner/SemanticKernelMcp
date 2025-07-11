@@ -399,3 +399,4 @@ FodyWeavers.xsd
 .idea/
 
 # csharp-sdk/
+LlmBenchmark/appsettings.Development.json

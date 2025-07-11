@@ -1,10 +1,14 @@
 using SignalRChat.Hubs;
+using LlmBenchmark.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
+
+// Configure LlmSettings
+builder.Services.Configure<LlmSettings>(builder.Configuration.GetSection("LlmSettings"));
 
 var app = builder.Build();
 
