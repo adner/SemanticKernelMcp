@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.ComponentModel;
+using System.Data;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +17,7 @@ namespace SemanticKernelMcpLib;
 
 public class SimplifiedKernel
 {
-    private ChatHistory chatHistory;
+    public ChatHistory ChatHistory;
 
     private Kernel kernel;
 
@@ -39,7 +41,7 @@ public class SimplifiedKernel
 
     public SimplifiedKernel(Kernel kernel, string model)
     {
-        this.chatHistory = new ChatHistory();
+        this.ChatHistory = new ChatHistory();
         this.kernel = kernel;
 
         if (_dataVerseMcpClient == null) _dataVerseMcpClient = getDataverseMcpClient().Result;
@@ -57,7 +59,7 @@ public class SimplifiedKernel
 
     public async Task<string> GetChatMessageContentAsync(string userMessage)
     {
-        chatHistory.AddUserMessage(userMessage);
+        ChatHistory.AddUserMessage(userMessage);
 
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
@@ -68,19 +70,19 @@ public class SimplifiedKernel
         };
 
         var response = await chatCompletionService.GetChatMessageContentAsync(
-            chatHistory,
+            ChatHistory,
             kernel: kernel,
             executionSettings: executionSettings
         );
 
-        chatHistory.Add(response);
+        ChatHistory.Add(response);
 
         return response.Content;
     }
 
     public async IAsyncEnumerable<string> GetChatMessageStreamingAsync(string userMessage)
     {
-        chatHistory.AddUserMessage(userMessage);
+        ChatHistory.AddUserMessage(userMessage);
 
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
@@ -103,7 +105,7 @@ public class SimplifiedKernel
         }
 
        var response = chatCompletionService.GetStreamingChatMessageContentsAsync(
-       chatHistory: chatHistory,
+       chatHistory: ChatHistory,
        kernel: kernel,
        executionSettings: executionSettings
    );
@@ -136,9 +138,7 @@ public class SimplifiedKernel
             builder.Append(chunk.ToString());
         }
 
-        
-
-        this.chatHistory.AddAssistantMessage(builder.ToString());
+        this.ChatHistory.AddAssistantMessage(builder.ToString());
     }
 
 
@@ -182,5 +182,158 @@ public class SimplifiedKernel
         {
             yield return $"- Name: {tool.Name}, Description: {tool.Description}\n";
         }
+    }
+}
+
+public class OrchestratorKernel
+{
+    private ChatHistory chatHistory;
+
+    private Kernel kernel;
+
+    public int InputTokenCount = 0;
+    public int OutputTokenCount = 0;
+
+    private double costPerInputToken;
+    private double costPerOutputToken;
+
+    private string model;
+
+    private string currentEvaluatedModelName;
+
+    private Func<string, Task> sendInfoMessageToOrchestrator;
+
+    public double Cost
+    {
+        get
+        {
+            return InputTokenCount * costPerInputToken + OutputTokenCount * costPerOutputToken;
+        }
+    }
+
+    public OrchestratorKernel(Kernel kernel, string model, Func<string, Task> sendInfoMessageToOrchestrator)
+    {
+        OrchestratorKernelPlugin plugin = new OrchestratorKernelPlugin(this);
+
+        this.chatHistory = new ChatHistory();
+        this.kernel = kernel;
+        this.model = model;
+        this.sendInfoMessageToOrchestrator = sendInfoMessageToOrchestrator;
+        this.currentEvaluatedModelName = string.Empty;
+
+        this.kernel.Plugins.AddFromObject(plugin);
+    }
+
+    public OrchestratorKernel(Kernel kernel, double costPerInputToken, double costPerOutputToken, string model, Func<string, Task> sendMessageToOrchestrator) : this(kernel, model, sendMessageToOrchestrator)
+    {
+        this.costPerInputToken = costPerInputToken;
+        this.costPerOutputToken = costPerOutputToken;
+    }
+
+    public async void SetCurrentModel(string modelName)
+    {
+        this.currentEvaluatedModelName = modelName;
+
+        await this.sendInfoMessageToOrchestrator("[SwitchModel]:" + modelName);
+    }
+
+    public async Task SendInfoMessageToOrchestratorAsync(string message)
+    {
+        await this.sendInfoMessageToOrchestrator(message);
+    }
+
+    public async IAsyncEnumerable<string> GetChatMessageStreamingAsync(string userMessage)
+    {
+        chatHistory.AddUserMessage(userMessage);
+
+        var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+
+        // Enable automatic function calling
+        PromptExecutionSettings executionSettings = null;
+
+        if (this.model == "o4-mini") //AllowParallelCalls parameter not supported for 04-mini
+        {
+            executionSettings = new()
+            {
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(options: new() { RetainArgumentTypes = true })
+            };
+        }
+        else
+        {
+            executionSettings = new()
+            {
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(options: new() { RetainArgumentTypes = true, AllowParallelCalls = false })
+            };
+        }
+
+        var response = chatCompletionService.GetStreamingChatMessageContentsAsync(
+        chatHistory: chatHistory,
+        kernel: kernel,
+        executionSettings: executionSettings
+    );
+
+        StringBuilder builder = new StringBuilder();
+
+        await foreach (var chunk in response)
+        {
+            var metadata = chunk.Metadata;
+
+            if (metadata != null && metadata.ContainsKey("Usage") && metadata["Usage"] != null)
+            {
+                if (metadata["Usage"] is OpenAI.Chat.ChatTokenUsage)
+                {
+                    OpenAI.Chat.ChatTokenUsage usage = (OpenAI.Chat.ChatTokenUsage)metadata["Usage"];
+
+                    this.InputTokenCount += usage.InputTokenCount;
+                    this.OutputTokenCount += usage.OutputTokenCount;
+                }
+                else if (metadata["Usage"] is Microsoft.Extensions.AI.UsageContent)
+                {
+                    Microsoft.Extensions.AI.UsageContent usage = (Microsoft.Extensions.AI.UsageContent)metadata["Usage"];
+
+                    this.InputTokenCount += (int)usage.Details.InputTokenCount;
+                    this.OutputTokenCount += (int)usage.Details.OutputTokenCount;
+                }
+            }
+
+            yield return chunk.ToString();
+            builder.Append(chunk.ToString());
+        }
+
+        this.chatHistory.AddAssistantMessage(builder.ToString());
+    }
+}
+
+
+public class OrchestratorKernelPlugin
+{
+
+    private OrchestratorKernel _orchestratorKernel;
+    public OrchestratorKernelPlugin(OrchestratorKernel orchestratorKernel)
+    {
+        this._orchestratorKernel = orchestratorKernel;
+    }
+
+    [KernelFunction("SendMessageToModel")]
+    [Description("Sends a message to the model that you are currently evaluating.")]
+    public async Task<string> SendMessageToModel(
+        [Description("The message to send to the model.")]
+        string message
+    )
+    {
+        await this._orchestratorKernel.SendInfoMessageToOrchestratorAsync("[SendToModel]:" + message);
+
+        return "The message has been sent to the model. Please wait until you get a response starting with [modelName].";
+    }
+
+    [KernelFunction("SetCurrentModel")]
+    [Description("Sets the current large language model that is being evaluated by the orchestrator.")]
+    public async Task SetCurrentModel(
+        [Description("The name of the model that is to be evaluated.")]
+        string modelName
+    )
+    {
+        this._orchestratorKernel.SetCurrentModel(modelName);
+        await Task.CompletedTask;
     }
 }
