@@ -250,7 +250,7 @@ namespace SignalRChat.Hubs
                 if (_streams.TryGetValue(_hubContext.ConnectionId, out var channel))
                 {
                     var arguments = context.Arguments;
-                    var toolCallMessage = $"<div class='toolCall'>{context.Function.Name}";
+                    var toolCallMessage = $"<div class='toolCall'>{context.Function.Name.Replace('_','-')}";
 
                     if (arguments.Any())
                     {
