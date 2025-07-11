@@ -1,6 +1,6 @@
 "use strict";
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/LlmChatHub").build();
+
 // Get modelName from query parameter
 function getQueryParam(name) {
     const params = new URLSearchParams(window.location.search);
@@ -8,12 +8,20 @@ function getQueryParam(name) {
 }
 var modelName = getQueryParam("model");
 
+var connection = new signalR.HubConnectionBuilder().withUrl("/LlmChatHub").build();
+ 
 document.getElementById("modelNameSpan").textContent = modelName;
 
 //Disable the send button until connection is established.
 document.getElementById("sendButton").disabled = true;
 
 connection.start().then(function () {
+
+    // Check if no model is loaded
+    if (modelName === "nomodel") {
+        return; // Exit early, don't set up the rest of the functionality
+    }
+
     document.getElementById("sendButton").disabled = false;
 
     let botMessageDiv = null;
@@ -101,7 +109,7 @@ connection.start().then(function () {
                     return; // Still waiting for content, do nothing.
                 }
 
-            
+
                 if (spinner) {
                     botMessageDiv.innerHTML = ""; // Clear the spinner
                     fullMessage = "";

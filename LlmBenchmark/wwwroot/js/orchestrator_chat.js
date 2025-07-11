@@ -115,6 +115,46 @@ connection.start().then(function () {
 
                     return; // Don't display this message in the chat
                 }
+                else if (typeof item === 'string' && item.startsWith("[SwitchModel]:")) {
+                    const modelText = item.substring("[SwitchModel]:".length).trim();
+                    
+                    // Replace the iframe with a new one using the new model
+                    const iframe = document.getElementById("currentModelIframe");
+                    if (iframe) {
+                        const wasHidden = iframe.hasAttribute("hidden") || iframe.style.display === "none";
+                        
+                        if (wasHidden) {
+                            // If it was hidden, just change src and fade in
+                            iframe.src = `/Index?model=${modelText}`;
+                            iframe.removeAttribute("hidden");
+                            iframe.style.display = "block";
+                            iframe.style.opacity = "0";
+                            iframe.style.transition = "opacity 0.3s ease-in-out";
+                            
+                            // Fade in after a brief delay to ensure the new content starts loading
+                            setTimeout(() => {
+                                iframe.style.opacity = "1";
+                            }, 100);
+                        } else {
+                            // If it was visible, fade out, change src, then fade in
+                            iframe.style.transition = "opacity 0.3s ease-in-out";
+                            iframe.style.opacity = "0";
+                            
+                            setTimeout(() => {
+                                iframe.src = `/Index?model=${modelText}`;
+                                iframe.removeAttribute("hidden");
+                                iframe.style.display = "block";
+                                
+                                // Fade in after changing src
+                                setTimeout(() => {
+                                    iframe.style.opacity = "1";
+                                }, 100);
+                            }, 300); // Wait for fade out to complete
+                        }
+                    }
+
+                    return; // Don't display this message in the chat
+                }
 
                 const spinner = botMessageDiv ? botMessageDiv.querySelector('.spinner') : null;
 
