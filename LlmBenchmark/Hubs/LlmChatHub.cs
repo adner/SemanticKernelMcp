@@ -83,6 +83,31 @@ namespace SignalRChat.Hubs
                     costPerInputToken = 0.1 / 1000000;
                     costPerOutputToken = 0.4 / 1000000;
                 }
+                else if (model == "gpt-3.5-turbo")
+                {
+                    kernel = create_gpt35turbo_Kernel();
+                    costPerInputToken = 0.5 / 1000000;
+                    costPerOutputToken = 1.5 / 1000000;
+                }
+                else if (model == "gpt-4o-mini")
+                {
+                    kernel = create_gpt4ominiturbo_Kernel();
+                    costPerInputToken = 0.15 / 1000000;
+                    costPerOutputToken = 0.6 / 1000000;
+                }
+                else if (model == "gpt-4o")
+                {
+                    kernel = create_gpt4o_Kernel();
+                    costPerInputToken = 2.5 / 1000000;
+                    costPerOutputToken = 10 / 1000000;
+                }
+                 else if (model == "o3")
+                {
+                    kernel = create_o3_Kernel();
+                    costPerInputToken = 2 / 1000000;
+                    costPerOutputToken = 8 / 1000000;
+                }
+
 
                 myKernel = new SimplifiedKernel(kernel, costPerInputToken, costPerOutputToken, model);
              
@@ -202,6 +227,34 @@ namespace SignalRChat.Hubs
         {
             var builder = Kernel.CreateBuilder();
             builder.AddOpenAIChatCompletion(modelId: "o4-mini", apiKey: _llmSettings.OpenAI.ApiKey);
+            return builder.Build();
+        }
+
+        Kernel create_gpt35turbo_Kernel()
+        {
+            var builder = Kernel.CreateBuilder();
+            builder.AddOpenAIChatCompletion(modelId: "gpt-3.5-turbo", apiKey: _llmSettings.OpenAI.ApiKey);
+            return builder.Build();
+        }
+
+        Kernel create_gpt4ominiturbo_Kernel()
+        {
+            var builder = Kernel.CreateBuilder();
+            builder.AddOpenAIChatCompletion(modelId: "gpt-4o-mini", apiKey: _llmSettings.OpenAI.ApiKey);
+            return builder.Build();
+        }
+
+        Kernel create_gpt4o_Kernel()
+        {
+            var builder = Kernel.CreateBuilder();
+            builder.AddOpenAIChatCompletion(modelId: "gpt-4o", apiKey: _llmSettings.OpenAI.ApiKey);
+            return builder.Build();
+        }
+
+         Kernel create_o3_Kernel()
+        {
+            var builder = Kernel.CreateBuilder();
+            builder.AddOpenAIChatCompletion(modelId: "o3", apiKey: _llmSettings.OpenAI.ApiKey);
             return builder.Build();
         }
 
